@@ -1,0 +1,25 @@
+import express from "express";
+import http from "http";
+const app = express();
+const server = http.createServer(app);
+import { Server } from "socket.io";
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+app.get("/", (_req, res) => {
+  // render the index template
+  res.render("index");
+});
+
+io.on("connection", (socket) => {
+  //   console.log(socket);
+});
+
+// start the express server
+server.listen(3000, () => {
+  // tslint:disable-next-line:no-console
+  console.log(`server started at http://localhost:3000`);
+});
