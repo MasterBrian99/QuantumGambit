@@ -12,4 +12,9 @@ const playerColorState = atom<BoardOrientation>({
   default: "white", // default value (aka initial value)
 });
 
-export { chessGameState, playerColorState };
+const isGameStartState = atom<boolean>({
+  key: "isGameStart", // unique ID (with respect to other atoms/selectors)
+  default: false, // default value (aka initial value)
+});
+
+export { chessGameState, playerColorState, isGameStartState };

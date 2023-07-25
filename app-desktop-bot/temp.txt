@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Group, Text, TextInput } from "@mantine/core";
+import { Box, Button, Flex, Group, TextInput } from "@mantine/core";
 import { Chessboard as ReactChessboard } from "react-chessboard";
 import {
   chessGameState,
@@ -31,7 +31,14 @@ const Chessboard = () => {
     const interval = setInterval(() => {
       if (isGameStart == true) {
         console.log("This will run every second!");
-        invokeAll();
+        invoke("get_all_moves", { value: game.fen() }).then((res: string) => {
+          const resp = res.split("");
+          console.log(res);
+          makeAMove({
+            from: resp[0] + resp[1],
+            to: resp[2] + resp[3],
+          });
+        });
       }
     }, 1500);
     return () => clearInterval(interval);
@@ -47,9 +54,7 @@ const Chessboard = () => {
       promotion: "q", // always promote to a queen for example simplicity
     });
     // illegal move
-    if (move === null) return false;
-    console.log(game.moves());
-
+    // if (move === null) return false;
     // setTimeout(makeRandomMove, 200);
     return true;
   }
@@ -60,16 +65,14 @@ const Chessboard = () => {
     //     from:'a1'
     //   })
     // );
-    invoke("step_new", { playerFen: game.fen(), moveList: game.moves() }).then(
-      (res: string) => {
-        // const resp = res.split("");
-        console.log(res);
-        makeAMove({
-          from: res[0] + res[1],
-          to: res[2] + res[3],
-        });
-      }
-    );
+    invoke("get_all_moves", { value: game.fen() }).then((res: string) => {
+      const resp = res.split("");
+      console.log(res);
+      makeAMove({
+        from: resp[0] + resp[1],
+        to: resp[2] + resp[3],
+      });
+    });
   }
   return (
     <Group position="center" align={"center"}>
@@ -90,8 +93,7 @@ const Chessboard = () => {
             value={game.fen()}
             readOnly
           />
-          {/* {game.get_comment()} */}
-          <Text>{game.get_comment()}</Text>
+          {game.get_comment()}
         </Box>
         <Box my={"lg"}>
           <Button onClick={() => invokeAll()}>manualq</Button>

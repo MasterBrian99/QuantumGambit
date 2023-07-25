@@ -1,9 +1,6 @@
 import {
-  MediaQuery,
   Aside as MantineAside,
   Button,
-  Box,
-  Text,
   Group,
   Switch,
   Flex,
@@ -11,12 +8,18 @@ import {
   Paper,
 } from "@mantine/core";
 import { useRecoilState } from "recoil";
-import { chessGameState, playerColorState } from "../../store/atom";
+import {
+  chessGameState,
+  isGameStartState,
+  playerColorState,
+} from "../../store/atom";
 import { Chess } from "chess.js";
+import UpdateFEN from "./UpdateFEN";
 
 const Aside = () => {
   const [_game, setGame] = useRecoilState(chessGameState);
   const [playerColor, setPlayerColor] = useRecoilState(playerColorState);
+  const [isGameStart, setIsGameStart] = useRecoilState(isGameStartState);
 
   function setColorPlayer(state: boolean) {
     if (state) {
@@ -37,6 +40,32 @@ const Aside = () => {
         >
           New Game Instance
         </Button>
+        <Paper withBorder p={"sm"} w={"100%"} mt={"md"}>
+          <Flex direction={"column"}>
+            <Button
+              disabled={isGameStart}
+              color="cyan"
+              onClick={() => {
+                console.log("clicked");
+                setIsGameStart(true);
+              }}
+            >
+              Start Game
+            </Button>
+            <Button
+              disabled={!isGameStart}
+              mt={"md"}
+              color="teal"
+              onClick={() => {
+                console.log("clicked");
+                setIsGameStart(false);
+              }}
+            >
+              Stop Game
+            </Button>
+          </Flex>
+        </Paper>
+
         <Group position="center" mt={"lg"}>
           <Paper withBorder p={"sm"} w={"100%"}>
             <Flex direction={"column"} align={"center"}>
@@ -51,6 +80,12 @@ const Aside = () => {
                 onLabel="WHITE"
                 offLabel="BLACK"
               />
+            </Flex>
+          </Paper>
+          <Paper withBorder p={"sm"} w={"100%"}>
+            <Flex direction={"column"} align={"center"}>
+              <Title order={4}>Update FEN</Title>
+              <UpdateFEN />
             </Flex>
           </Paper>
         </Group>
