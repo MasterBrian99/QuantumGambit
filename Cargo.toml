@@ -3,4 +3,10 @@ name = "quantum-gambit"
 version = "0.1.0"
 edition = "2021"
 
+
+[workspace]
+members = [
+    "chess"
+]
 [dependencies]
+chess = { path = "chess" }
