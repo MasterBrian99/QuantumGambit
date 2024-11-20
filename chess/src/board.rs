@@ -31,6 +31,54 @@ impl Board {
             squares: Board::generate_initial_board(),
         }
     }
+    pub  fn from_fen(fen:&str)->Self{
+
+        let mut squares: [Option<Piece>; 144] = [None; 144];
+
+        // Fill the entire board with Red placeholders for off-board squares
+        for i in 0..144 {
+            let row = i / 12;
+            let col = i % 12;
+            if row < 2 || row > 9 || col < 2 || col > 9 {
+                squares[i] = Some(Piece {
+                    color: Color::Red,
+                    kind: Kind::Empty,
+                });
+            }
+        };
+        let piece_from_char = |c: char| -> Option<Piece> {
+            let color = if c.is_uppercase() { Color::White } else { Color::Black };
+            let kind = match c.to_ascii_lowercase() {
+                'k' => Kind::King,
+                'q' => Kind::Queen,
+                'r' => Kind::Rook,
+                'b' => Kind::Bishop,
+                'n' => Kind::Knight,
+                'p' => Kind::Pawn,
+                _ => Kind::Empty,
+            };
+            Some(Piece { color, kind })
+        };
+        let ranks: Vec<&str> = fen.split('/').collect();
+        for (rank_idx, rank) in ranks.iter().enumerate() {
+            let board_row = 2 + rank_idx; // FEN's top-to-bottom corresponds to board's 2 to 9
+
+            let mut board_col = 2;
+            for c in rank.chars() {
+                if c.is_digit(10) {
+                    // Empty squares (e.g., '3' -> 3 empty squares)
+                    board_col += c.to_digit(10).unwrap() as usize;
+                } else {
+                    // Place a piece
+                    squares[board_row * 12 + board_col] = piece_from_char(c);
+                    board_col += 1;
+                }
+            }
+        }
+
+        Board { squares }
+
+    }
 
     fn is_inside_playable_area(index: usize) -> bool {
         let row = index / 12;
