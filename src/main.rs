@@ -1,6 +1,8 @@
 use chess;
 
 fn main() {
-    println!("Hello, world!");
-    println!("{}",chess::add(1,2));
+    let board=chess::board::Board::new();
+    println!();
+    board.print_chess_board();
+    println!();
 }
