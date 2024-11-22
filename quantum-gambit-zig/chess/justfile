@@ -1,0 +1,5 @@
+test-piece:
+        zig test src/pieces.zig
+
+test-board:
+        zig test src/board.zig -freference-trace
