@@ -21,3 +21,7 @@ type Piece struct {
 	color Color
 	kind  Kind
 }
+
+func NewPiece(color Color, kind Kind) Piece {
+	return Piece{color, kind}
+}
