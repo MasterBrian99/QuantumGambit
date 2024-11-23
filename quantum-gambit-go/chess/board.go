@@ -200,3 +200,7 @@ func (b *Board) PrintEmojiBoard() {
 	}
 	fmt.Println("  a  b  c  d  e  f  g  h")
 }
+
+func (b *Board) PlayMove(move string) {
+
+}
