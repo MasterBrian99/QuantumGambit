@@ -4,3 +4,4 @@
 - https://www.huy.rocks/web-debugger/01-04-2022-zig-strings-in-5-minutes
 - https://zig.news/
 - https://gencmurat.com/en/posts/zig-strings/
+- https://www.openmymind.net

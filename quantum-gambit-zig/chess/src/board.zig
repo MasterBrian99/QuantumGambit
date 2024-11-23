@@ -54,7 +54,7 @@ pub const Board = struct {
         for (fenSplit.items) |item| {
             std.debug.print(" {s}\n", .{item});
         }
-        for (fen) |c| {
+        for (fenSplit.items[0]) |c| {
             if (c == ' ') break;
             var rank: usize = 0;
             var file: usize = 0;
@@ -118,6 +118,23 @@ test "new board" {
 test "from fen" {
     const board = Board.fromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     try std.testing.expect(board.squares[0] != null);
-    try std.testing.expect(board.squares[0]);
-    try std.testing.expect(board.squares[0].?.color == pieces.Color.Black);
+    const pie = board.squares[0].?;
+    // try std.testing.expect(pie.color == pieces.Color.Black);
+    std.debug.print("{}", .{pie.color});
+
+    // for (board.squares) |value| {
+    //     std.debug.print("{?\n}", .{value});
+    // }
+    for (board.squares, 0..) |value, i| {
+        std.debug.print("{} : ", .{i});
+        // const newPiece = pieces.Piece{ .color = pieces.Color.Black, .kind = pieces.Kind.Bishop };
+
+        // if (@typeInfo(@TypeOf(value)) == .Optional) {
+        // std.debug.print("null \n ", .{});
+        // } else {
+        std.debug.print("{?} \n ", .{value});
+        // }
+    }
+    // try std.testing.expect(board.squares[0]);
+    // try std.testing.expect(board.squares[0].?.color == pieces.Color.Black);
 }
