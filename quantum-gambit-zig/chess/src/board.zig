@@ -2,10 +2,14 @@ const std = @import("std");
 const pieces = @import("pieces.zig");
 pub const Board = struct {
     squares: [64]?pieces.Piece,
+    fn initSquares() [64]?pieces.Piece {
+        return [_]?pieces.Piece{null} ** 64; // Fill the array with 64 `null` elements
+    }
+
     pub fn new() Board {
         const pieceOrder = [8]pieces.Kind{ pieces.Kind.Rook, pieces.Kind.Knight, pieces.Kind.Bishop, pieces.Kind.Queen, pieces.Kind.King, pieces.Kind.Bishop, pieces.Kind.Knight, pieces.Kind.Rook };
 
-        var board = Board{ .squares = undefined };
+        var board = Board{ .squares = initSquares() };
         for (pieceOrder, 0..) |value, i| {
             const newPiece = pieces.Piece{ .color = pieces.Color.Black, .kind = value };
             board.squares[i] = newPiece;
@@ -32,11 +36,13 @@ pub const Board = struct {
         return board;
     }
 
-    pub fn fromFen(fen: []const u8) []const u8 {
+    pub fn fromFen(fen: []const u8) Board {
         // var board = Board{ .squares = undefined };
+        var board = Board{ .squares = initSquares() };
 
         const allocator = std.heap.page_allocator;
         var fenSplit = std.ArrayList([]const u8).init(allocator);
+        fenSplit.deinit();
         var split = std.mem.split(u8, fen, " ");
 
         while (split.next()) |value| {
@@ -48,8 +54,46 @@ pub const Board = struct {
         for (fenSplit.items) |item| {
             std.debug.print(" {s}\n", .{item});
         }
-        fenSplit.deinit();
-        return fen;
+        for (fen) |c| {
+            if (c == ' ') break;
+            var rank: usize = 0;
+            var file: usize = 0;
+            switch (c) {
+                '/' => {
+                    rank += 1;
+                    file = 0;
+                },
+                '1'...'8' => {
+                    const numEmptySquares = @as(usize, c - '0');
+                    for (numEmptySquares) |_| {
+                        // if (rank * 8 + file >= 64) return error.InvalidFEN;
+                        board.squares[rank * 8 + file] = null;
+                        file += 1;
+                    }
+                },
+                else => {
+                    const piece = switch (c) {
+                        'P' => pieces.Piece.new(.White, .Pawn),
+                        'N' => pieces.Piece.new(.White, .Knight),
+                        'B' => pieces.Piece.new(.White, .Bishop),
+                        'R' => pieces.Piece.new(.White, .Rook),
+                        'Q' => pieces.Piece.new(.White, .Queen),
+                        'K' => pieces.Piece.new(.White, .King),
+                        'p' => pieces.Piece.new(.Black, .Pawn),
+                        'n' => pieces.Piece.new(.Black, .Knight),
+                        'b' => pieces.Piece.new(.Black, .Bishop),
+                        'r' => pieces.Piece.new(.Black, .Rook),
+                        'q' => pieces.Piece.new(.Black, .Queen),
+                        'k' => pieces.Piece.new(.Black, .King),
+                        else => null,
+                    };
+                    // if (rank * 8 + file >= 64) return error.InvalidFEN;
+                    board.squares[rank * 8 + file] = piece;
+                    file += 1;
+                },
+            }
+        }
+        return board;
     }
 };
 
@@ -73,6 +117,7 @@ test "new board" {
 
 test "from fen" {
     const board = Board.fromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    const equal = std.mem.eql(u8, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", board);
-    try std.testing.expect(equal);
+    try std.testing.expect(board.squares[0] != null);
+    try std.testing.expect(board.squares[0]);
+    try std.testing.expect(board.squares[0].?.color == pieces.Color.Black);
 }

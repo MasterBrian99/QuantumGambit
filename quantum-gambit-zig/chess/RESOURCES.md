@@ -1,0 +1,6 @@
+- https://zig.guide/
+- https://ziglang.org/documentation/0.13.0/#Primitive-Types
+- https://ziggit.dev/
+- https://www.huy.rocks/web-debugger/01-04-2022-zig-strings-in-5-minutes
+- https://zig.news/
+- https://gencmurat.com/en/posts/zig-strings/

@@ -11,15 +11,21 @@ pub const Kind = enum {
     King,
 };
 
-pub const Piece = struct { color: Color, kind: Kind };
+pub const Piece = struct {
+    color: Color,
+    kind: Kind,
+    pub fn new(color: Color, kind: Kind) Piece {
+        return Piece{ .color = color, .kind = kind };
+    }
+};
 
-pub fn newPiece(color: Color, kind: Kind) Piece {
-    return Piece{ .color = color, .kind = kind };
-}
+// pub fn newPiece(color: Color, kind: Kind) Piece {
+//     return Piece{ .color = color, .kind = kind };
+// }
 
 test "new piece" {
-    const piece = Piece{ .color = Color.Black, .kind = Kind.Bishop };
-    const newPieceItem = newPiece(Color.Black, Kind.Bishop);
+    const piece = Piece.new(Color.Black, Kind.Bishop);
+    const newPieceItem = Piece.new(Color.Black, Kind.Bishop);
     try std.testing.expect(piece.color == newPieceItem.color);
     try std.testing.expect(piece.kind == newPieceItem.kind);
 }
