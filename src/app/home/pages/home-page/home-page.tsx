@@ -1,5 +1,14 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Clock } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Clock,
+  Copy,
+  Import,
+  RefreshCcw
+} from 'lucide-react'
 import { Chessboard } from 'react-chessboard'
 import {
   Card,
@@ -12,24 +21,195 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
 import { ScrollArea } from '@/components/ui/scroll-area'
-
+import { Chess, ChessInstance, Piece, Square } from 'chess.js'
+import { useState } from 'react'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 const HomePage = () => {
+  type CurrentGameType = {
+    fen: string
+    game: ChessInstance
+    currentMovePosition: number
+    pgn: string
+    history: string[]
+  }
+  const [currentGame, setcurrentGame] = useState<CurrentGameType>({
+    fen: '',
+    currentMovePosition: 0,
+    game: new Chess(),
+    pgn: '',
+    history: []
+  })
+  // const [currentGameHistory, setcurrentGameHistory] = useState<string[]>([])
+  const [inputPgn, setInputPgn] = useState('')
+  function setPgn() {
+    const fromPgn = new Chess()
+    fromPgn.load_pgn(inputPgn)
+    setcurrentGame({
+      fen: fromPgn.fen(),
+      currentMovePosition: fromPgn.history().length,
+      game: fromPgn,
+      pgn: inputPgn,
+      history: fromPgn.history()
+    })
+    // setcurrentGameHistory(fromPgn.history())
+  }
+
+  function goForwardAndBackward(
+    type: 'forward' | 'backward' | 'reset' | 'start' | 'end'
+  ) {
+    const newGameInstance = { ...currentGame }
+    if (currentGame.history.length > 0) {
+      if (type === 'forward') {
+        if (
+          newGameInstance.game.move(
+            currentGame.history[currentGame.currentMovePosition]
+          )
+        ) {
+          const fen = newGameInstance.game.fen()
+          setcurrentGame({
+            ...currentGame,
+            fen,
+            currentMovePosition: currentGame.currentMovePosition + 1,
+            game: newGameInstance.game
+          })
+        }
+      }
+      if (type === 'backward') {
+        if (newGameInstance.game.undo()) {
+          const fen = newGameInstance.game.fen()
+          setcurrentGame({
+            ...currentGame,
+            fen,
+            currentMovePosition: currentGame.currentMovePosition - 1,
+            game: newGameInstance.game
+          })
+        }
+      }
+      if (type === 'reset' || type === 'end') {
+        const fromPgn = new Chess()
+        fromPgn.load_pgn(currentGame.pgn)
+        setcurrentGame({
+          fen: fromPgn.fen(),
+          currentMovePosition: fromPgn.history().length,
+          game: fromPgn,
+          pgn: inputPgn,
+          history: fromPgn.history()
+        })
+      }
+      if (type === 'start') {
+        const newGame = new Chess()
+        setcurrentGame({
+          fen: newGame.fen(),
+          currentMovePosition: 0,
+          game: newGame,
+          pgn: inputPgn,
+          history: currentGame.history
+        })
+      }
+    }
+  }
+  function onDrop(_sourceSquare: Square, _targetSquare: Square) {
+    return false
+  }
   return (
     <div>
       <div className="grid grid-cols-12 grid-rows-1 gap-3">
         <div className="col-span-4">
-          <div>
-            <Chessboard id="BasicBoard" />
+          <div className="flex flex-col">
+            <Chessboard
+              onPieceDrop={onDrop}
+              position={currentGame.game.fen()}
+              id="BasicBoard"
+            />
+            <div className="mt-2 flex justify-between gap-2">
+              <div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="default" size="icon">
+                      <Import />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Import a game</DialogTitle>
+                      <DialogDescription>
+                        Anyone who has this link will be able to view this.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex items-center space-x-2">
+                      <div className="grid flex-1 gap-2">
+                        <Label htmlFor="link" className="sr-only">
+                          Link
+                        </Label>
+                        <Textarea
+                          onChange={(e) => setInputPgn(e.target.value)}
+                          value={inputPgn}
+                          rows={10}
+                          id="pgn"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter className="sm:justify-end">
+                      <DialogClose asChild>
+                        <Button
+                          onClick={() => setPgn()}
+                          type="button"
+                          variant="secondary"
+                        >
+                          Import
+                        </Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <div className="gap-2 flex">
+                <Button
+                  onClick={() => goForwardAndBackward('start')}
+                  variant="default"
+                  size="icon"
+                >
+                  <ChevronsLeft />
+                </Button>
+                <Button
+                  onClick={() => goForwardAndBackward('backward')}
+                  variant="default"
+                  size="icon"
+                >
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  variant="default"
+                  size="icon"
+                  onClick={() => goForwardAndBackward('reset')}
+                >
+                  <RefreshCcw />
+                </Button>
+                <Button
+                  onClick={() => goForwardAndBackward('forward')}
+                  variant="default"
+                  size="icon"
+                >
+                  <ChevronRight />
+                </Button>
+                <Button variant="default" size="icon">
+                  <ChevronsRight />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
         <div className="col-span-3 ">
